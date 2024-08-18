@@ -31,39 +31,34 @@ async function run() {
       const skip = (page - 1) * limit;
       const searchQuery = req.query.search || "";
       const brand = req.query.brand || "";
-      const category = req.query.category || "";
+      const categoryName = req.query.categoryName || "";
       const priceRange = req.query.priceRange || "";
       const sortBy = req.query.sortBy || "";
-      const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
+      const sortOrder = req.query.sortOrder || "asc";
 
-      // Build the query
       let query = {};
-
       if (searchQuery) {
         query.productName = { $regex: searchQuery, $options: "i" };
       }
       if (brand) {
         query.brandName = brand;
       }
-      if (category) {
-        query.categoryName = category;
+      if (categoryName) {
+        query.categoryName = categoryName;
       }
       if (priceRange) {
         query.priceRange = priceRange;
       }
 
-      // Build the sort criteria
-      let sortCriteria = {};
-      if (sortBy === "price") {
-        sortCriteria.price = sortOrder;
-      } else if (sortBy === "date") {
-        sortCriteria.productCreationDate = sortOrder;
+      const sortOptions = {};
+      if (sortBy) {
+        sortOptions[sortBy] = sortOrder === "asc" ? 1 : -1;
       }
 
       const totalProducts = await productCollection.countDocuments(query);
       const result = await productCollection
         .find(query)
-        .sort(sortCriteria)
+        .sort(sortOptions)
         .skip(skip)
         .limit(limit)
         .toArray();
