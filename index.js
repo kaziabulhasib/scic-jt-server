@@ -29,15 +29,21 @@ async function run() {
       const page = parseInt(req.query.page) || 1;
       const limit = parseInt(req.query.limit) || 6;
       const skip = (page - 1) * limit;
+      const searchQuery = req.query.search || "";
 
-      const totalProducts = await productCollection.countDocuments(); // Total number of products
+      let query = {};
+      if (searchQuery) {
+        query = {
+          productName: { $regex: searchQuery, $options: "i" },
+        };
+      }
+
+      const totalProducts = await productCollection.countDocuments(query);
       const result = await productCollection
-        .find()
+        .find(query)
         .skip(skip)
         .limit(limit)
         .toArray();
-
-      // to do: add searcing method
 
       res.send({
         totalProducts,
