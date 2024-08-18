@@ -31,6 +31,8 @@ async function run() {
       const skip = (page - 1) * limit;
       const searchQuery = req.query.search || "";
 
+      // to do : case sensitivity check
+
       let query = {};
       if (searchQuery) {
         query = {
