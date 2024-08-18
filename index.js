@@ -37,6 +37,8 @@ async function run() {
         .limit(limit)
         .toArray();
 
+      // to do: add searcing method
+
       res.send({
         totalProducts,
         totalPages: Math.ceil(totalProducts / limit),
