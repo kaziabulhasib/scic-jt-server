@@ -30,19 +30,40 @@ async function run() {
       const limit = parseInt(req.query.limit) || 6;
       const skip = (page - 1) * limit;
       const searchQuery = req.query.search || "";
+      const brand = req.query.brand || "";
+      const category = req.query.category || "";
+      const priceRange = req.query.priceRange || "";
+      const sortBy = req.query.sortBy || "";
+      const sortOrder = req.query.sortOrder === "desc" ? -1 : 1;
 
-      // to do : case sensitivity check 2
-
+      // Build the query
       let query = {};
+
       if (searchQuery) {
-        query = {
-          productName: { $regex: searchQuery, $options: "i" },
-        };
+        query.productName = { $regex: searchQuery, $options: "i" };
+      }
+      if (brand) {
+        query.brandName = brand;
+      }
+      if (category) {
+        query.categoryName = category;
+      }
+      if (priceRange) {
+        query.priceRange = priceRange;
+      }
+
+      // Build the sort criteria
+      let sortCriteria = {};
+      if (sortBy === "price") {
+        sortCriteria.price = sortOrder;
+      } else if (sortBy === "date") {
+        sortCriteria.productCreationDate = sortOrder;
       }
 
       const totalProducts = await productCollection.countDocuments(query);
       const result = await productCollection
         .find(query)
+        .sort(sortCriteria)
         .skip(skip)
         .limit(limit)
         .toArray();
